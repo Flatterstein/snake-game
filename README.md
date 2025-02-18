@@ -1,7 +1,8 @@
 # Snake Spiel 🐍🎮
 
-Dies ist ein einfaches Snake-Spiel, das in HTML, CSS und JavaScript programmiert wurde.  
-Steuere die Schlange mit den Pfeiltasten und sammle Essen, um zu wachsen! Aber pass auf der Apfel will natürlich nicht gegessen werden!
+Dies ist ein einfaches(Lüge) Snake-Spiel, das in HTML, CSS und JavaScript programmiert wurde.  
+Steuere die Schlange mit den Pfeiltasten und sammle den Apfel, um zu wachsen, aber pass auf der Apfel haut ab! 
+Falls du dich wunderst warum der Apfel so inteligent ist, es ist der Apfel der Isaac Newton auf den Kopf gefallen ist!
 
 ## 🎮 Steuerung:
 - ⬆️ Hoch
