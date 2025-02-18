@@ -1,7 +1,7 @@
 # Snake Spiel 🐍🎮
 
 Dies ist ein einfaches Snake-Spiel, das in HTML, CSS und JavaScript programmiert wurde.  
-Steuere die Schlange mit den Pfeiltasten und sammle Essen, um zu wachsen!
+Steuere die Schlange mit den Pfeiltasten und sammle Essen, um zu wachsen! Aber pass auf der Apfel will natürlich nicht gegessen werden!
 
 ## 🎮 Steuerung:
 - ⬆️ Hoch
