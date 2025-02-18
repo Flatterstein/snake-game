@@ -87,7 +87,6 @@
         var food;
         var score;
         var gameInterval;
-        var foodInterval;
         var direction;
         var gameStarted = false;
         var highscore = localStorage.getItem("highscore") ? parseInt(localStorage.getItem("highscore")) : 0;
@@ -99,7 +98,6 @@
             direction = null;
             gameStarted = false;
             clearInterval(gameInterval);
-            clearInterval(foodInterval);
             document.getElementById("game-over").style.display = "none";
             document.getElementById("play-again").style.display = "none";
             document.getElementById("highscore").textContent = "Highscore: " + highscore;
@@ -146,47 +144,23 @@
             if (direction === "up") head.y--;
             if (direction === "down") head.y++;
             snake.unshift(head);
+
             if (head.x === food.x && head.y === food.y) {
                 score++;
-                spawnFood(); // Apfel wird neu gesetzt, wenn er gegessen wird
+                spawnFood();
             } else {
                 snake.pop();
             }
+
             if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || collisionWithSnake(head)) {
                 clearInterval(gameInterval);
-                clearInterval(foodInterval);
                 document.getElementById("game-over").style.display = "block";
                 document.getElementById("play-again").style.display = "block";
                 checkHighscore();
             }
-            draw();
-        }
 
-        function moveFood() {
-            // Berechne den Abstand zur Schlange
-            var dx = food.x - snake[0].x;
-            var dy = food.y - snake[0].y;
-            var distance = Math.sqrt(dx * dx + dy * dy);
-
-            // Bewege den Apfel nur, wenn die Schlange 2 Blöcke entfernt ist
-            if (distance < 2) {
-                // Normiere die Richtung
-                if (distance > 0) {
-                    dx /= distance;
-                    dy /= distance;
-
-                    // Bewege den Apfel in die entgegengesetzte Richtung zur Schlange
-                    food.x += Math.round(dx);
-                    food.y += Math.round(dy);
-
-                    // Überprüfen, ob der Apfel die Grenzen erreicht hat
-                    if (food.x < 0 || food.x >= 20 || food.y < 0 || food.y >= 20) {
-                        // Setze den Apfel in die Nähe der Schlange, wenn er die Grenze erreicht
-                        food.x = Math.max(0, Math.min(19, food.x));
-                        food.y = Math.max(0, Math.min(19, food.y));
-                    }
-                }
-            }
+            // Bewegung des Apfels
+            moveFood(head);
             draw();
         }
 
@@ -202,11 +176,53 @@
             }
         }
 
+        function moveFood(head) {
+            // Berechnung der Distanz zur Schlange
+            const distanceX = food.x - head.x;
+            const distanceY = food.y - head.y;
+
+            // Wenn die Schlange näher als 2 Blöcke ist
+            if (Math.abs(distanceX) < 2 && Math.abs(distanceY) < 2) {
+                // Wenn der Apfel an einer Wand ist
+                if ((food.x === 0 && distanceX < 0) || (food.x === 19 && distanceX > 0) ||
+                    (food.y === 0 && distanceY < 0) || (food.y === 19 && distanceY > 0)) {
+                    // Apfel weicht zufällig in eine Richtung aus
+                    const randomDirection = Math.floor(Math.random() * 4);
+                    switch (randomDirection) {
+                        case 0: // nach oben
+                            if (food.y > 0) food.y--;
+                            break;
+                        case 1: // nach unten
+                            if (food.y < 19) food.y++;
+                            break;
+                        case 2: // nach links
+                            if (food.x > 0) food.x--;
+                            break;
+                        case 3: // nach rechts
+                            if (food.x < 19) food.x++;
+                            break;
+                    }
+                } else {
+                    // Normalerweise in die Richtung der Schlange bewegen
+                    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+                        food.x += distanceX > 0 ? 1 : -1; // Bewegungsrichtung horizontal
+                    } else {
+                        food.y += distanceY > 0 ? 1 : -1; // Bewegungsrichtung vertikal
+                    }
+
+                    // Wandüberprüfung
+                    if (food.x < 0) food.x = 0;
+                    if (food.x > 19) food.x = 19;
+                    if (food.y < 0) food.y = 0;
+                    if (food.y > 19) food.y = 19;
+                }
+            }
+        }
+
         function startGame() {
             setup();
             gameStarted = true;
             gameInterval = setInterval(moveSnake, 100);
-            foodInterval = setInterval(moveFood, 100); // Apfel bewegt sich ebenfalls
         }
 
         function changeDirection(newDirection) {
@@ -219,7 +235,7 @@
             if (newDirection === "right" && direction !== "left") direction = "right";
         }
 
-        // Event Listener für Tasteneingaben (physische Tasten)
+        // Event Listener für Tasteneingaben
         window.addEventListener("keydown", function(event) {
             if (!gameStarted) {
                 startGame();
