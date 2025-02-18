@@ -82,15 +82,16 @@
         var food;
         var score;
         var gameInterval;
-        var direction = null; // Keine Richtung am Anfang
-        var gameStarted = false;
+        var direction = null; // Keine Bewegung am Anfang
+        var gameStarted = false; // Spiel startet erst nach Eingabe einer Taste
 
         function setup() {
             snake = [{ x: 10, y: 10 }];
             spawnFood();
             score = 0;
-            direction = null; // Schlange steht still
+            direction = null;
             gameStarted = false;
+            clearInterval(gameInterval);
             document.getElementById("game-over").style.display = "none";
             document.getElementById("play-again").style.display = "none";
             draw();
@@ -112,7 +113,7 @@
         }
 
         function moveSnake() {
-            if (!direction) return; // Falls keine Richtung gewählt, bleibt die Schlange stehen
+            if (!direction) return; // Wenn keine Richtung eingegeben wurde, bewegt sich die Schlange nicht
 
             var head = { x: snake[0].x, y: snake[0].y };
 
@@ -159,11 +160,16 @@
             }
         }
 
+        function startGame() {
+            setup();
+        }
+
         document.addEventListener("keydown", function (event) {
             if (!gameStarted) {
                 gameStarted = true;
-                gameInterval = setInterval(moveSnake, 100); // Startet das Spiel erst, wenn eine Richtungstaste gedrückt wird
+                gameInterval = setInterval(moveSnake, 100);
             }
+
             if (event.key === "ArrowUp" && direction !== "down") direction = "up";
             if (event.key === "ArrowDown" && direction !== "up") direction = "down";
             if (event.key === "ArrowLeft" && direction !== "right") direction = "left";
@@ -192,7 +198,7 @@
 
             if (!gameStarted) {
                 gameStarted = true;
-                gameInterval = setInterval(moveSnake, 100); // Startet das Spiel erst, wenn gewischt wird
+                gameInterval = setInterval(moveSnake, 100);
             }
 
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -209,10 +215,6 @@
                 }
             }
         });
-
-        function startGame() {
-            setup();
-        }
 
         startGame();
     </script>
