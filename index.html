@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>Snake-Spiel</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@
             border: 2px solid black;
             touch-action: none;
         }
-        #game-over, #play-again, #readme-link, #cc {
+        #game-over, #play-again, #readme-link, #cc, #highscore {
             margin-top: 15px;
         }
         #game-over {
@@ -59,8 +59,9 @@
 </head>
 <body>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <div id="game-over">Game Over!</div>
-    <button id="play-again" onclick="startGame()">Spiele erneut</button>
+    <div id="game-over">Spiel beendet!</div>
+    <button id="play-again" onclick="startGame()">Nochmal spielen</button>
+    <div id="highscore">Highscore: 0</div>
     <div id="readme-link">
         <p><a href="https://github.com/flatterstein/snake-game/blob/main/README.md" target="_blank">Readme für das Spiel</a></p>
     </div>
@@ -87,7 +88,8 @@
         var score;
         var gameInterval;
         var direction;
-        var gameStarted;
+        var gameStarted = false;
+        var highscore = localStorage.getItem("highscore") ? parseInt(localStorage.getItem("highscore")) : 0;
 
         function setup() {
             snake = [{ x: 10, y: 10 }];
@@ -98,17 +100,40 @@
             clearInterval(gameInterval);
             document.getElementById("game-over").style.display = "none";
             document.getElementById("play-again").style.display = "none";
+            document.getElementById("highscore").textContent = "Highscore: " + highscore;
             draw();
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Raster zeichnen
+            ctx.strokeStyle = "#ccc";
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Schlange zeichnen
             ctx.fillStyle = "green";
             snake.forEach(segment => ctx.fillRect(segment.x * 20, segment.y * 20, 20, 20));
+            
+            // Essen zeichnen
             ctx.fillStyle = "red";
             ctx.fillRect(food.x * 20, food.y * 20, 20, 20);
+            
+            // Punktzahl anzeigen
             ctx.fillStyle = "black";
-            ctx.fillText("Score: " + score, 10, 20);
+            ctx.font = "16px Arial";
+            ctx.fillText("Punktzahl: " + score, 10, 20);
         }
 
         function moveSnake() {
@@ -129,6 +154,7 @@
                 clearInterval(gameInterval);
                 document.getElementById("game-over").style.display = "block";
                 document.getElementById("play-again").style.display = "block";
+                checkHighscore();
             }
             draw();
         }
@@ -147,17 +173,46 @@
 
         function startGame() {
             setup();
+            gameStarted = true;
+            gameInterval = setInterval(moveSnake, 100);
         }
 
         function changeDirection(newDirection) {
             if (!gameStarted) {
-                gameStarted = true;
-                gameInterval = setInterval(moveSnake, 100);
+                startGame();
             }
             if (newDirection === "up" && direction !== "down") direction = "up";
             if (newDirection === "down" && direction !== "up") direction = "down";
             if (newDirection === "left" && direction !== "right") direction = "left";
             if (newDirection === "right" && direction !== "left") direction = "right";
+        }
+
+        // Event Listener für Tasteneingaben (physische Tasten)
+        window.addEventListener("keydown", function(event) {
+            if (!gameStarted) {
+                startGame();
+            }
+
+            if (event.key === "ArrowUp" && direction !== "down") {
+                changeDirection("up");
+            }
+            if (event.key === "ArrowDown" && direction !== "up") {
+                changeDirection("down");
+            }
+            if (event.key === "ArrowLeft" && direction !== "right") {
+                changeDirection("left");
+            }
+            if (event.key === "ArrowRight" && direction !== "left") {
+                changeDirection("right");
+            }
+        });
+
+        function checkHighscore() {
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem("highscore", highscore);
+                document.getElementById("highscore").textContent = "Highscore: " + highscore;
+            }
         }
 
         setup();
