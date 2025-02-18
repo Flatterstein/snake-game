@@ -8,22 +8,25 @@
         body {
             font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            text-align: center;
         }
 
         canvas {
-            border: 1px solid black;
+            border: 2px solid black;
+            touch-action: none;
         }
 
         #game-over {
-            text-align: center;
             font-size: 30px;
             color: red;
             display: none;
+            margin-top: 20px;
         }
 
         #play-again {
@@ -34,6 +37,7 @@
             border: none;
             cursor: pointer;
             display: none;
+            margin-top: 10px;
         }
 
         #play-again:hover {
@@ -41,10 +45,8 @@
         }
 
         #readme-link {
-            display: block;
-            text-align: center;
-            font-size: 18px;
             margin-top: 20px;
+            font-size: 18px;
         }
 
         #readme-link a {
@@ -55,15 +57,22 @@
         #readme-link a:hover {
             text-decoration: underline;
         }
+
+        #cc {
+            margin-top: 30px;
+            font-size: 14px;
+            color: gray;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <div id="game-over">Game Over!</div>
-    <button id="play-again" onclick="startGame()">Play Again</button>
+    <button id="play-again" onclick="startGame()">Spiele erneut</button>
     <div id="readme-link">
         <p><a href="https://github.com/flatterstein/snake-game/blob/main/README.md" target="_blank">Readme für das Spiel</a></p>
     </div>
+    <div id="cc">© Emanuel B</div>
 
     <script>
         var canvas = document.getElementById("gameCanvas");
@@ -73,44 +82,38 @@
         var food;
         var score;
         var gameInterval;
+        var direction = null; // Keine Richtung am Anfang
+        var gameStarted = false;
 
-        // Snake Game Setup
         function setup() {
-            snake = [{
-                x: 10,
-                y: 10
-            }];
-            food = {
-                x: Math.floor(Math.random() * 20),
-                y: Math.floor(Math.random() * 20)
-            };
+            snake = [{ x: 10, y: 10 }];
+            spawnFood();
             score = 0;
+            direction = null; // Schlange steht still
+            gameStarted = false;
             document.getElementById("game-over").style.display = "none";
             document.getElementById("play-again").style.display = "none";
             draw();
         }
 
-        // Game Loop
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Snake
             ctx.fillStyle = "green";
             for (var i = 0; i < snake.length; i++) {
                 ctx.fillRect(snake[i].x * 20, snake[i].y * 20, 20, 20);
             }
 
-            // Draw Food
             ctx.fillStyle = "red";
             ctx.fillRect(food.x * 20, food.y * 20, 20, 20);
 
-            // Update Score
             ctx.fillStyle = "black";
             ctx.fillText("Score: " + score, 10, 20);
         }
 
-        // Move Snake
         function moveSnake() {
+            if (!direction) return; // Falls keine Richtung gewählt, bleibt die Schlange stehen
+
             var head = { x: snake[0].x, y: snake[0].y };
 
             if (direction === "right") head.x++;
@@ -120,18 +123,13 @@
 
             snake.unshift(head);
 
-            // Check for collision with food
             if (head.x === food.x && head.y === food.y) {
                 score++;
-                food = {
-                    x: Math.floor(Math.random() * 20),
-                    y: Math.floor(Math.random() * 20)
-                };
+                spawnFood();
             } else {
                 snake.pop();
             }
 
-            // Check for collision with walls or itself
             if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || collisionWithSnake(head)) {
                 clearInterval(gameInterval);
                 document.getElementById("game-over").style.display = "block";
@@ -141,7 +139,6 @@
             draw();
         }
 
-        // Check if snake collides with itself
         function collisionWithSnake(head) {
             for (var i = 1; i < snake.length; i++) {
                 if (head.x === snake[i].x && head.y === snake[i].y) {
@@ -151,22 +148,72 @@
             return false;
         }
 
-        // Handle user input
-        var direction = "right";
+        function spawnFood() {
+            let validPosition = false;
+            while (!validPosition) {
+                food = {
+                    x: Math.floor(Math.random() * 20),
+                    y: Math.floor(Math.random() * 20)
+                };
+                validPosition = !snake.some(segment => segment.x === food.x && segment.y === food.y);
+            }
+        }
+
         document.addEventListener("keydown", function (event) {
+            if (!gameStarted) {
+                gameStarted = true;
+                gameInterval = setInterval(moveSnake, 100); // Startet das Spiel erst, wenn eine Richtungstaste gedrückt wird
+            }
             if (event.key === "ArrowUp" && direction !== "down") direction = "up";
             if (event.key === "ArrowDown" && direction !== "up") direction = "down";
             if (event.key === "ArrowLeft" && direction !== "right") direction = "left";
             if (event.key === "ArrowRight" && direction !== "left") direction = "right";
         });
 
-        // Start Game
+        // Touch-Gesten für mobile Geräte
+        var touchStartX = 0;
+        var touchStartY = 0;
+        var touchEndX = 0;
+        var touchEndY = 0;
+
+        canvas.addEventListener("touchstart", function (event) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        });
+
+        canvas.addEventListener("touchmove", function (event) {
+            touchEndX = event.touches[0].clientX;
+            touchEndY = event.touches[0].clientY;
+        });
+
+        canvas.addEventListener("touchend", function () {
+            var deltaX = touchEndX - touchStartX;
+            var deltaY = touchEndY - touchStartY;
+
+            if (!gameStarted) {
+                gameStarted = true;
+                gameInterval = setInterval(moveSnake, 100); // Startet das Spiel erst, wenn gewischt wird
+            }
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX > 0 && direction !== "left") {
+                    direction = "right";
+                } else if (deltaX < 0 && direction !== "right") {
+                    direction = "left";
+                }
+            } else {
+                if (deltaY > 0 && direction !== "up") {
+                    direction = "down";
+                } else if (deltaY < 0 && direction !== "down") {
+                    direction = "up";
+                }
+            }
+        });
+
         function startGame() {
             setup();
-            gameInterval = setInterval(moveSnake, 100);
         }
 
-        // Initial Game Start
         startGame();
     </script>
 </body>
