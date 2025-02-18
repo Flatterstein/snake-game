@@ -10,7 +10,7 @@ Steuere die Schlange mit den Pfeiltasten und sammle Essen, um zu wachsen!
 - ➡️ Rechts
 
 ## 🚀 Live-Version:
-[Hier klicken, um das Spiel online zu spielen]((https://flatterstein.github.io/snake-game/#-lizenz))
+[Hier klicken, um das Spiel online zu spielen][(https://flatterstein.github.io/snake-game/#-lizenz)]
 
 ## 📜 Lizenz:
 Dieses Projekt ist Open Source – du kannst den Code gerne verwenden und anpassen!
