@@ -63,6 +63,27 @@
             font-size: 14px;
             color: gray;
         }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            border: none;
+            background-color: #ddd;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .control-btn:active {
+            background-color: #bbb;
+        }
     </style>
 </head>
 <body>
@@ -74,6 +95,19 @@
     </div>
     <div id="cc">© Emanuel B</div>
 
+    <!-- Virtuelle Pfeiltasten -->
+    <div class="controls">
+        <button class="control-btn"></button>
+        <button class="control-btn" onclick="changeDirection('up')">⬆️</button>
+        <button class="control-btn"></button>
+        <button class="control-btn" onclick="changeDirection('left')">⬅️</button>
+        <button class="control-btn"></button>
+        <button class="control-btn" onclick="changeDirection('right')">➡️</button>
+        <button class="control-btn"></button>
+        <button class="control-btn" onclick="changeDirection('down')">⬇️</button>
+        <button class="control-btn"></button>
+    </div>
+
     <script>
         var canvas = document.getElementById("gameCanvas");
         var ctx = canvas.getContext("2d");
@@ -82,8 +116,8 @@
         var food;
         var score;
         var gameInterval;
-        var direction = null; // Keine Bewegung am Anfang
-        var gameStarted = false; // Spiel startet erst nach Eingabe einer Taste
+        var direction = null;
+        var gameStarted = false;
 
         function setup() {
             snake = [{ x: 10, y: 10 }];
@@ -113,7 +147,7 @@
         }
 
         function moveSnake() {
-            if (!direction) return; // Wenn keine Richtung eingegeben wurde, bewegt sich die Schlange nicht
+            if (!direction) return;
 
             var head = { x: snake[0].x, y: snake[0].y };
 
@@ -141,12 +175,7 @@
         }
 
         function collisionWithSnake(head) {
-            for (var i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    return true;
-                }
-            }
-            return false;
+            return snake.some(segment => segment.x === head.x && segment.y === head.y);
         }
 
         function spawnFood() {
@@ -176,45 +205,17 @@
             if (event.key === "ArrowRight" && direction !== "left") direction = "right";
         });
 
-        // Touch-Gesten für mobile Geräte
-        var touchStartX = 0;
-        var touchStartY = 0;
-        var touchEndX = 0;
-        var touchEndY = 0;
-
-        canvas.addEventListener("touchstart", function (event) {
-            touchStartX = event.touches[0].clientX;
-            touchStartY = event.touches[0].clientY;
-        });
-
-        canvas.addEventListener("touchmove", function (event) {
-            touchEndX = event.touches[0].clientX;
-            touchEndY = event.touches[0].clientY;
-        });
-
-        canvas.addEventListener("touchend", function () {
-            var deltaX = touchEndX - touchStartX;
-            var deltaY = touchEndY - touchStartY;
-
+        function changeDirection(newDirection) {
             if (!gameStarted) {
                 gameStarted = true;
                 gameInterval = setInterval(moveSnake, 100);
             }
 
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                if (deltaX > 0 && direction !== "left") {
-                    direction = "right";
-                } else if (deltaX < 0 && direction !== "right") {
-                    direction = "left";
-                }
-            } else {
-                if (deltaY > 0 && direction !== "up") {
-                    direction = "down";
-                } else if (deltaY < 0 && direction !== "down") {
-                    direction = "up";
-                }
-            }
-        });
+            if (newDirection === "up" && direction !== "down") direction = "up";
+            if (newDirection === "down" && direction !== "up") direction = "down";
+            if (newDirection === "left" && direction !== "right") direction = "left";
+            if (newDirection === "right" && direction !== "left") direction = "right";
+        }
 
         startGame();
     </script>
