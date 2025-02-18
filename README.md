@@ -11,7 +11,7 @@ Falls du dich wunderst warum der Apfel so inteligent ist, es ist der Apfel der I
 - ➡️ Rechts
 
 ## 🚀 Live-Version:
-[Hier klicken, um das Spiel online zu spielen][(https://flatterstein.github.io/snake-game/#-lizenz)]
+[(https://flatterstein.github.io/snake-game/#-lizenz)]
 
 ## 📜 Lizenz:
 Dieses Projekt ist Open Source – du kannst den Code gerne verwenden und anpassen!
