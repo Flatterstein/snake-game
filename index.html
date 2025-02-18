@@ -87,6 +87,7 @@
         var food;
         var score;
         var gameInterval;
+        var foodInterval;
         var direction;
         var gameStarted = false;
         var highscore = localStorage.getItem("highscore") ? parseInt(localStorage.getItem("highscore")) : 0;
@@ -98,6 +99,7 @@
             direction = null;
             gameStarted = false;
             clearInterval(gameInterval);
+            clearInterval(foodInterval);
             document.getElementById("game-over").style.display = "none";
             document.getElementById("play-again").style.display = "none";
             document.getElementById("highscore").textContent = "Highscore: " + highscore;
@@ -146,15 +148,44 @@
             snake.unshift(head);
             if (head.x === food.x && head.y === food.y) {
                 score++;
-                spawnFood();
+                spawnFood(); // Apfel wird neu gesetzt, wenn er gegessen wird
             } else {
                 snake.pop();
             }
             if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || collisionWithSnake(head)) {
                 clearInterval(gameInterval);
+                clearInterval(foodInterval);
                 document.getElementById("game-over").style.display = "block";
                 document.getElementById("play-again").style.display = "block";
                 checkHighscore();
+            }
+            draw();
+        }
+
+        function moveFood() {
+            // Berechne den Abstand zur Schlange
+            var dx = food.x - snake[0].x;
+            var dy = food.y - snake[0].y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Bewege den Apfel nur, wenn die Schlange 2 Blöcke entfernt ist
+            if (distance < 2) {
+                // Normiere die Richtung
+                if (distance > 0) {
+                    dx /= distance;
+                    dy /= distance;
+
+                    // Bewege den Apfel in die entgegengesetzte Richtung zur Schlange
+                    food.x += Math.round(dx);
+                    food.y += Math.round(dy);
+
+                    // Überprüfen, ob der Apfel die Grenzen erreicht hat
+                    if (food.x < 0 || food.x >= 20 || food.y < 0 || food.y >= 20) {
+                        // Setze den Apfel in die Nähe der Schlange, wenn er die Grenze erreicht
+                        food.x = Math.max(0, Math.min(19, food.x));
+                        food.y = Math.max(0, Math.min(19, food.y));
+                    }
+                }
             }
             draw();
         }
@@ -175,6 +206,7 @@
             setup();
             gameStarted = true;
             gameInterval = setInterval(moveSnake, 100);
+            foodInterval = setInterval(moveFood, 100); // Apfel bewegt sich ebenfalls
         }
 
         function changeDirection(newDirection) {
